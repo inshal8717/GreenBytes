@@ -10,6 +10,7 @@ import {
   logoutFirebaseUser,
   registerUserAccount,
   saveUserProfile,
+  seedListingsIfEmpty,
   updateLiveLocation,
   uploadListingImage,
   watchBookingsForFarmer,
@@ -18,6 +19,7 @@ import {
 } from "./firebaseService.js";
 import { distanceLabel, pointInPolygon, safeZoneBox } from "./geo.js";
 import { mountGoogleMap, mountLocationPicker, mountSafeZonePicker } from "./maps.js";
+import { applyArabicUi, translateArabicText } from "./i18n.js";
 
 let listings = [...seedListings];
 let unsubscribeListings = null;
@@ -52,6 +54,7 @@ const state = {
   astronomyEventIndex: 0,
   newListingSafeZone: [],
   listingSaveConfirmation: null,
+  language: localStorage.getItem("duroob.language") === "ar" ? "ar" : "en",
 };
 
 const app = document.querySelector("#app");
@@ -71,6 +74,14 @@ const spaceNotes = [
 function setState(patch) {
   Object.assign(state, patch);
   render();
+}
+
+function localize(value) {
+  return state.language === "ar" ? translateArabicText(value) : value;
+}
+
+function localizedAlert(message) {
+  alert(localize(message));
 }
 
 async function registerWithPassword(form) {
@@ -98,6 +109,7 @@ async function registerWithPassword(form) {
       bookings: [],
       screen: isProvider ? "farmerOnboarding" : "safety",
     });
+    seedFirebaseListings();
     startFirebaseListeners(firebaseUser.uid, isProvider ? "farmer" : "tourist");
   } catch (error) {
     if (shouldUseLocalAuthFallback(error)) {
@@ -175,17 +187,21 @@ async function enterFirebaseSession(firebaseUser) {
     bookings: [],
     screen: activeRole === "farmer" ? "dashboard" : user.safetyPledgeAccepted ? "map" : "safety",
   });
+  seedFirebaseListings();
   startFirebaseListeners(firebaseUser.uid, activeRole);
 }
 
 async function initializeLoginScreen() {
   try {
     const firebaseUser = await getCurrentFirebaseUser();
-    if (firebaseUser) await logoutFirebaseUser();
+    if (firebaseUser) {
+      await enterFirebaseSession(firebaseUser);
+      return;
+    }
   } catch (error) {
-    console.warn("Could not clear the previous Firebase session.", error);
+    console.warn("Could not restore the previous Firebase session.", error);
   } finally {
-    render();
+    if (!state.signedIn) render();
   }
 }
 
@@ -213,6 +229,12 @@ function startFirebaseListeners(uid, activeRole) {
   );
 }
 
+function seedFirebaseListings() {
+  seedListingsIfEmpty(seedListings).catch((error) => {
+    console.warn("Could not seed listings.", error);
+  });
+}
+
 function roleLabel() {
   if (state.activeRole !== "farmer") return "Tourist";
   return providerTypeLabel(state.user.providerType);
@@ -226,7 +248,8 @@ function providerTypeLabel(type) {
 
 function pageTitle() {
   const titles = {
-    map: "Al Qua'a map",
+    map: "Book Experience",
+    providers: "Guides and Local Businesses",
     plan: "Plan my evening",
     bookings: "My bookings",
     dashboard: `${providerTypeLabel(state.user.providerType)} dashboard`,
@@ -239,8 +262,12 @@ function pageTitle() {
 }
 
 function render() {
+  document.documentElement.lang = state.language;
+  document.documentElement.dir = state.language === "ar" ? "rtl" : "ltr";
+  document.body.classList.toggle("rtl", state.language === "ar");
   if (!state.signedIn || state.screen === "welcome") {
     app.innerHTML = welcomeView();
+    if (state.language === "ar") applyArabicUi(app);
     wireWelcome();
     return;
   }
@@ -261,6 +288,7 @@ function render() {
           <div class="pill-row">
             <span class="pill">${state.user.name}</span>
             <span class="pill">${state.firebaseStatus}</span>
+            ${languageToggleView()}
             <button class="ghost-btn" data-action="logout">Log out</button>
           </div>
         </div>
@@ -276,13 +304,19 @@ function render() {
     ${spaceNoteView()}
     ${astronomyEventPopup()}
   `;
+  if (state.language === "ar") applyArabicUi(app);
   wireApp();
+}
+
+function languageToggleView() {
+  return `<button class="language-toggle" type="button" data-action="toggleLanguage" data-no-translate aria-label="Switch language">${state.language === "ar" ? "English" : "العربية"}</button>`;
 }
 
 function welcomeView() {
   const isRegister = state.authMode === "register";
   return `
     <section class="hero">
+      <div class="welcome-language-toggle">${languageToggleView()}</div>
       <div class="hero-inner">
         <div class="eyebrow">Al Qua'a Tourism</div>
         <h1>Book desert skies, farm visits, and local guides without losing the village economy on the roadside.</h1>
@@ -335,7 +369,8 @@ function welcomeView() {
 
 function sidebarView() {
   const touristItems = [
-    ["map", "Map"],
+    ["map", "Book Experience"],
+    ["providers", "Guides and Local Businesses"],
     ["sky", "Sky map"],
     ["plan", "Plan evening"],
     ["bookings", "My bookings"],
@@ -369,6 +404,7 @@ function screenView() {
   if (state.screen === "safety") return safetyView();
   if (state.screen === "farmerOnboarding") return farmerOnboardingView();
   if (state.screen === "map") return mapView();
+  if (state.screen === "providers") return providersView();
   if (state.screen === "sky") return skyView();
   if (state.screen === "plan") return planView();
   if (state.screen === "bookings") return bookingsView();
@@ -471,6 +507,39 @@ function mapView() {
       </div>
       <div class="map-listings-grid">
         ${listings.map(mapListingCard).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function listingProviderKind(listing) {
+  const searchable = `${listing.providerType || ""} ${listing.businessType || ""} ${listing.ownerId || ""}`.toLowerCase();
+  if (searchable.includes("guide") || searchable.includes("operator")) return "guide";
+  if (searchable.includes("business") || searchable.includes("kitchen") || searchable.includes("cooperative")) return "business";
+  return "farmer";
+}
+
+function providersView() {
+  const guides = listings.filter((listing) => listingProviderKind(listing) === "guide");
+  const businesses = listings.filter((listing) => listingProviderKind(listing) === "business");
+  return `
+    <section class="providers-section">
+      <div class="section-heading">
+        <div><div class="eyebrow">Meet local experts</div><h2>Guides</h2></div>
+        <span class="pill">${guides.length} guide listings</span>
+      </div>
+      <div class="map-listings-grid">
+        ${guides.map(mapListingCard).join("") || `<div class="empty">No guide listings yet.</div>`}
+      </div>
+    </section>
+    <section class="providers-section">
+      <div class="section-heading">
+        <div><div class="eyebrow">Spend locally</div><h2>Local Businesses</h2></div>
+        <span class="pill">${businesses.length + localSpots.length} local businesses</span>
+      </div>
+      <div class="map-listings-grid">
+        ${businesses.map(mapListingCard).join("")}
+        ${localSpots.map((spot) => `<div class="card"><div class="card-body">${localBusinessCard(spot)}</div></div>`).join("")}
       </div>
     </section>
   `;
@@ -1034,7 +1103,20 @@ function planBookingView() {
   `;
 }
 
+function wireLanguageToggle() {
+  app.querySelector('[data-action="toggleLanguage"]')?.addEventListener("click", () => {
+    state.language = state.language === "ar" ? "en" : "ar";
+    localStorage.setItem("duroob.language", state.language);
+    if (window.google?.maps && state.authProvider === "firebase") {
+      window.location.reload();
+      return;
+    }
+    render();
+  });
+}
+
 function wireWelcome() {
+  wireLanguageToggle();
   app.querySelector("[data-auth-mode]")?.addEventListener("click", (event) => {
     setState({ authMode: event.currentTarget.dataset.authMode, authError: "" });
   });
@@ -1043,7 +1125,7 @@ function wireWelcome() {
     const button = event.currentTarget.querySelector("button[type='submit']");
     const originalText = button.textContent;
     button.disabled = true;
-    button.textContent = "Please wait...";
+    button.textContent = localize("Please wait...");
     try {
       const form = new FormData(event.currentTarget);
       if (state.authMode === "register") await registerWithPassword(form);
@@ -1061,6 +1143,7 @@ function wireWelcome() {
 }
 
 function wireApp() {
+  wireLanguageToggle();
   app.querySelector('[data-action="closeAstronomyPopup"]')?.addEventListener("click", () => {
     setState({ astronomyPopupOpen: false });
   });
@@ -1119,7 +1202,7 @@ function wireApp() {
   app.querySelector('[data-action="prevSafety"]')?.addEventListener("click", () => setState({ safetySlide: state.safetySlide - 1 }));
   app.querySelector('[data-action="acceptSafety"]')?.addEventListener("click", () => {
     const checked = Boolean(app.querySelector("[data-safety-check]")?.checked);
-    if (!checked) return alert("Please confirm the safety pledge first.");
+    if (!checked) return localizedAlert("Please confirm the safety pledge first.");
     const user = { ...state.user, safetyPledgeAccepted: true };
     persistUserProfile(user);
     setState({ user, screen: "map" });
@@ -1189,28 +1272,23 @@ function wireApp() {
 }
 
 async function saveFarmerListing(form) {
-  const button = form.querySelector("button[type='submit'], button:not([type]), input[type='submit']");
-  const originalText = button?.textContent || button?.value || "Save listing";
+  const button = form.querySelector("button[type='submit'], button:not([type])");
+  if (!button) throw new Error("The listing form has no submit button.");
+  const originalText = button.textContent;
   if (state.authProvider !== "firebase" || !state.uid) {
-    alert("Provider listings require a connected Firebase account. Sign in again and retry.");
+    localizedAlert("Provider listings require a connected Firebase account. Sign in again and retry.");
     return;
   }
-  if (button) {
-    button.disabled = true;
-    if ("textContent" in button) button.textContent = "Saving to Firebase...";
-    else button.value = "Saving to Firebase...";
-  }
+  button.disabled = true;
+  button.textContent = localize("Saving to Firebase...");
   const formData = new FormData(form);
   const file = formData.get("photo");
   const providerType = state.user.providerType || "farmer";
   const isFarmer = providerType === "farmer";
   if (isFarmer && state.newListingSafeZone.length < 3) {
-    alert("Draw at least three boundary points around the farm before saving.");
-    if (button) {
-      button.disabled = false;
-      if ("textContent" in button) button.textContent = originalText;
-      else button.value = originalText;
-    }
+    localizedAlert("Draw at least three boundary points around the farm before saving.");
+    button.disabled = false;
+    button.textContent = originalText;
     return;
   }
   const safeZone = isFarmer ? [...state.newListingSafeZone] : defaultSafeZone(state.newListingLocation || alQuaaCenter);
@@ -1277,12 +1355,11 @@ async function saveFarmerListing(form) {
   } catch (error) {
     console.warn("Could not save listing to Firebase.", error);
     setState({ firebaseStatus: "Listing save failed" });
-    alert(`Listing was not published: ${error?.message || "Firebase save failed."}`);
+    localizedAlert(`Listing was not published: ${error?.message || "Firebase save failed."}`);
   } finally {
-    if (button?.isConnected) {
+    if (button.isConnected) {
       button.disabled = false;
-      if ("textContent" in button) button.textContent = originalText;
-      else button.value = originalText;
+      button.textContent = originalText;
     }
   }
 }
@@ -1295,11 +1372,12 @@ async function generateItinerary(arrival, budget, preferences) {
   state.planItinerary = null;
   state.planSource = null;
   result.innerHTML = `<h2>Suggested schedule</h2><p class="muted">Generating...</p>`;
+  if (state.language === "ar") applyArabicUi(result);
   try {
     const response = await fetch("/api/itinerary", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ arrival, budget, preferences, listings, localSpots }),
+      body: JSON.stringify({ arrival, budget, preferences, listings, localSpots, language: state.language }),
     });
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || "Planner failed.");
@@ -1308,6 +1386,7 @@ async function generateItinerary(arrival, budget, preferences) {
   } catch (error) {
     console.warn(error);
     result.innerHTML = `<h2>Suggested schedule</h2>${itineraryHtml(arrival, budget, preferences)}`;
+    if (state.language === "ar") applyArabicUi(result);
   }
   wireApp();
 }
@@ -1363,7 +1442,7 @@ async function createBooking(button) {
   const originalText = button?.textContent || "Yes, book it";
   if (button) {
     button.disabled = true;
-    button.textContent = "Saving to Firebase...";
+    button.textContent = localize("Saving to Firebase...");
   }
 
   try {
@@ -1372,14 +1451,18 @@ async function createBooking(button) {
     if (replacementId) {
       try {
         await withTimeout(
-          deleteBookingRecord(state.uid, replacementId),
+          deleteBookingRecord(
+            state.uid,
+            replacementId,
+            state.bookings.find((booking) => booking.id === replacementId)?.ownerId,
+          ),
           authTimeoutMs,
           "The old booking removal timed out.",
         );
         replacementRemoved = true;
       } catch (replacementError) {
         console.warn("New booking saved, but the old booking could not be removed.", replacementError);
-        alert("The new booking was saved, but the old booking could not be removed. Remove it manually from My bookings.");
+        localizedAlert("The new booking was saved, but the old booking could not be removed. Remove it manually from My bookings.");
       }
     }
     state.bookings = [
@@ -1397,7 +1480,7 @@ async function createBooking(button) {
   } catch (error) {
     console.warn("Could not save booking to Firebase.", error);
     const errorDetails = [error?.code, error?.message].filter(Boolean).join(": ");
-    alert(`Booking was not saved: ${errorDetails || "Firebase write failed."}`);
+    localizedAlert(`Booking was not saved: ${errorDetails || "Firebase write failed."}`);
     if (button?.isConnected) {
       button.disabled = false;
       button.textContent = originalText;
@@ -1460,15 +1543,19 @@ async function removeBooking(button) {
 
   const originalText = button.textContent;
   button.disabled = true;
-  button.textContent = "Removing...";
+  button.textContent = localize("Removing...");
   try {
-    await withTimeout(deleteBookingRecord(state.uid, bookingId), authTimeoutMs, "Booking removal timed out.");
+    await withTimeout(
+      deleteBookingRecord(state.uid, bookingId, booking.ownerId),
+      authTimeoutMs,
+      "Booking removal timed out.",
+    );
     state.bookings = state.bookings.filter((item) => item.id !== bookingId);
     state.pendingBookingRemoval = null;
     render();
   } catch (error) {
     console.warn("Could not remove booking.", error);
-    alert(`Booking was not removed: ${error?.message || "Firebase delete failed."}`);
+    localizedAlert(`Booking was not removed: ${error?.message || "Firebase delete failed."}`);
     if (button.isConnected) {
       button.disabled = false;
       button.textContent = originalText;
@@ -1485,11 +1572,11 @@ function updatePlanBookingTotal() {
   const totalElement = app.querySelector("[data-plan-booking-total]");
   const budgetElement = app.querySelector("[data-plan-booking-budget]");
   const confirmButton = app.querySelector('[data-action="confirmPlanBookings"]');
-  if (totalElement) totalElement.textContent = `AED ${total}`;
+  if (totalElement) totalElement.textContent = localize(`AED ${total}`);
   if (budgetElement) {
-    budgetElement.textContent = total > state.planBudget
+    budgetElement.textContent = localize(total > state.planBudget
       ? `AED ${total - state.planBudget} over the plan budget.`
-      : `AED ${state.planBudget - total} remaining from the plan budget.`;
+      : `AED ${state.planBudget - total} remaining from the plan budget.`);
   }
   if (confirmButton) confirmButton.disabled = checked.length === 0 || total > state.planBudget;
 }
@@ -1500,10 +1587,10 @@ async function createPlanBookings(button) {
     .filter(Boolean);
   if (!selected.length) return;
   const total = selected.reduce((sum, item) => sum + Number(item.activity.price || 0), 0);
-  if (total > state.planBudget) return alert("The selected activities exceed the plan budget.");
+  if (total > state.planBudget) return localizedAlert("The selected activities exceed the plan budget.");
 
   button.disabled = true;
-  button.textContent = "Saving bookings to Firebase...";
+  button.textContent = localize("Saving bookings to Firebase...");
   const saved = [];
   const failed = [];
   for (const suggestion of selected) {
@@ -1519,7 +1606,7 @@ async function createPlanBookings(button) {
 
   if (failed.length) {
     const firstError = failed[0]?.message || "Firebase write failed.";
-    alert(`${saved.length} booking(s) saved; ${failed.length} failed: ${firstError}`);
+    localizedAlert(`${saved.length} booking(s) saved; ${failed.length} failed: ${firstError}`);
   }
   setState({
     screen: saved.length ? "bookings" : "plan",
@@ -1559,7 +1646,7 @@ function mountLocationPickerIfNeeded() {
     onPick: (location) => {
       state.newListingLocation = location;
       const label = app.querySelector("[data-location-label]");
-      if (label) label.textContent = `Selected: ${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}`;
+      if (label) label.textContent = localize(`Selected: ${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}`);
     },
   }).catch((error) => {
     console.warn(error);
@@ -1578,14 +1665,14 @@ function mountSafeZonePickerIfNeeded() {
       if (points.length) state.newListingLocation = polygonCenter(points);
       const label = app.querySelector("[data-safe-zone-label]");
       if (label) {
-        label.textContent = points.length >= 3
+        label.textContent = localize(points.length >= 3
           ? `${points.length} boundary points selected · polygon ready to save`
-          : `${points.length} boundary points selected · add ${3 - points.length} more`;
+          : `${points.length} boundary points selected · add ${3 - points.length} more`);
       }
     },
   }).catch((error) => {
     console.warn(error);
-    container.innerHTML = `<p class="auth-error">Google Maps could not load. The farm boundary cannot be saved yet.</p>`;
+    container.innerHTML = `<p class="auth-error">${localize("Google Maps could not load. The farm boundary cannot be saved yet.")}</p>`;
   });
 }
 
@@ -1801,7 +1888,7 @@ function updateSpaceNote() {
   if (!note) return;
   note.classList.remove("fade-note");
   void note.offsetWidth;
-  note.textContent = spaceNotes[state.quoteIndex];
+  note.textContent = localize(spaceNotes[state.quoteIndex]);
   note.classList.add("fade-note");
 }
 

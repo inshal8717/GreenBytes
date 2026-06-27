@@ -187,14 +187,40 @@ export function watchBookingsForUser(uid, callback, onError) {
 }
 
 export function watchBookingsForFarmer(uid, callback, onError) {
-  const ownerQuery = query(collectionGroup(db, "bookings"), where("ownerId", "==", uid));
-  return onSnapshot(
-    ownerQuery,
+  let inboxBookings = [];
+  let legacyBookings = [];
+  const emit = () => {
+    const merged = new Map();
+    [...legacyBookings, ...inboxBookings].forEach((booking) => merged.set(booking.id, booking));
+    callback([...merged.values()]);
+  };
+
+  // New bookings are mirrored into an owner inbox, so dashboards do not depend
+  // on a collection-group index being deployed before they become useful.
+  const unsubscribeInbox = onSnapshot(
+    collection(db, "users", uid, "receivedBookings"),
     (snapshot) => {
-      callback(snapshot.docs.map((item) => ({ ...item.data(), id: item.id })));
+      inboxBookings = snapshot.docs.map((item) => ({ ...item.data(), id: item.id }));
+      emit();
     },
     onError,
   );
+
+  // Keep reading the old shape as a migration path for bookings made by older builds.
+  const ownerQuery = query(collectionGroup(db, "bookings"), where("ownerId", "==", uid));
+  const unsubscribeLegacy = onSnapshot(
+    ownerQuery,
+    (snapshot) => {
+      legacyBookings = snapshot.docs.map((item) => ({ ...item.data(), id: item.id }));
+      emit();
+    },
+    (error) => console.warn("Legacy booking query unavailable; using the provider inbox.", error),
+  );
+
+  return () => {
+    unsubscribeInbox();
+    unsubscribeLegacy();
+  };
 }
 
 export async function findBookingConflict(uid, slot, excludeBookingId = null) {
@@ -214,19 +240,34 @@ export async function createBookingRecord(uid, booking) {
     throw new Error("You must be signed in with Firebase to create a booking.");
   }
   const { id: _localId, touristId: _untrustedTouristId, ...bookingData } = booking;
-  const docRef = await addDoc(collection(db, "users", uid, "bookings"), {
+  const docRef = doc(collection(db, "users", uid, "bookings"));
+  const bookingRecord = {
     ...bookingData,
     touristId: uid,
     createdAt: serverTimestamp(),
+  };
+  // Save the tourist copy first so an outdated provider-inbox rule cannot roll
+  // back a valid booking. The mirror succeeds once the included rules are deployed.
+  await setDoc(docRef, bookingRecord);
+  await setDoc(
+    doc(db, "users", booking.ownerId, "receivedBookings", docRef.id),
+    bookingRecord,
+  ).catch((error) => {
+    console.warn("Booking saved, but the provider inbox mirror was rejected.", error);
   });
   return docRef.id;
 }
 
-export async function deleteBookingRecord(uid, bookingId) {
+export async function deleteBookingRecord(uid, bookingId, ownerId = null) {
   if (!auth.currentUser || auth.currentUser.uid !== uid) {
     throw new Error("You must be signed in with Firebase to remove a booking.");
   }
   await deleteDoc(doc(db, "users", uid, "bookings", bookingId));
+  if (ownerId) {
+    await deleteDoc(doc(db, "users", ownerId, "receivedBookings", bookingId)).catch((error) => {
+      console.warn("Booking removed, but its provider inbox mirror could not be cleared.", error);
+    });
+  }
   await remove(ref(rtdb, `bookingLocations/${bookingId}`)).catch((error) => {
     console.warn("Booking removed, but its live-location record could not be cleared.", error);
   });

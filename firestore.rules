@@ -26,8 +26,24 @@ service cloud.firestore {
           && (request.auth.uid == userId
             || resource.data.ownerId == request.auth.uid);
       }
+
+      match /receivedBookings/{bookingId} {
+        allow read: if signedIn() && request.auth.uid == userId;
+        allow create: if signedIn()
+          && request.resource.data.touristId == request.auth.uid
+          && request.resource.data.ownerId == userId;
+        allow update: if signedIn()
+          && (request.auth.uid == userId
+            || resource.data.touristId == request.auth.uid)
+          && request.resource.data.touristId == resource.data.touristId
+          && request.resource.data.ownerId == resource.data.ownerId;
+        allow delete: if signedIn()
+          && (request.auth.uid == userId
+            || resource.data.touristId == request.auth.uid);
+      }
     }
 
+    // Supports provider dashboards reading bookings made by older app builds.
     match /{path=**}/bookings/{bookingId} {
       allow read: if signedIn() && resource.data.ownerId == request.auth.uid;
     }

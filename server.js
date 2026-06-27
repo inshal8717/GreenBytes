@@ -106,6 +106,9 @@ function buildPrompt(body) {
 
   return [
     "You are the itinerary planner inside an Al Qua'a local tourism marketplace.",
+    body.language === "ar"
+      ? "MANDATORY LANGUAGE: write the entire response in Arabic. Do not use any English words; use د.إ for currency and Arabic labels."
+      : "Write the response in English.",
     "Create a detailed, practical schedule tailored to the visitor's interests.",
     "STRICT GROUNDING: use only activities and businesses in the supplied catalogs. Never invent a stop, activity, host, price, time slot, or inclusion.",
     "Schedule activities only at an availableStartTime and never before arrival.",
@@ -147,6 +150,26 @@ function buildFallbackPlan(body) {
   const dinner = localSpots.find((spot) => spot.type === "Restaurant") || localSpots[0];
   const dinnerCost = dinner ? Number(dinner.price || 0) : 0;
   const choice = activities.find((item) => Number(item.activity.price) + dinnerCost <= budget) || activities[0];
+
+  if (body.language === "ar") {
+    if (!choice) {
+      return `${arrival} | الوصول | لا يوجد نشاط متاح يناسب وقت الوصول والميزانية البالغة ${budget} د.إ.\nالإجمالي | ٠ د.إ | لم يتم تحديد حجز.\nالمتبقي | ${budget} د.إ | عدّل وقت الوصول أو الميزانية أو النشاط المطلوب.`;
+    }
+    const activityCost = Number(choice.activity.price || 0);
+    const canAddDinner = dinner && activityCost + dinnerCost <= budget;
+    const total = activityCost + (canAddDinner ? dinnerCost : 0);
+    const slot = choice.availableSlots[0];
+    const host = choice.listing.businessName || choice.listing.ownerName;
+    const duration = choice.activity.duration || choice.listing.duration || "المدة مؤكدة من المضيف";
+    const includes = (choice.listing.includes || []).join("، ") || "راجع تفاصيل القائمة";
+    return [
+      `${arrival} | الوصول | توجّه إلى منطقة الزوار واحمل الماء وراجع حدود المنطقة الآمنة الزرقاء.`,
+      canAddDinner ? `${arrival} وما بعده | ${dinner.name} | ${dinner.description}؛ تكلفة تقديرية ${dinnerCost} د.إ؛ مفتوح ${dinner.hours}.` : null,
+      `${slot} | ${choice.activity.name} | ${choice.listing.title} بضيافة ${host}؛ ${duration}؛ ${activityCost} د.إ؛ يشمل ${includes}؛ ابقَ داخل المنطقة الآمنة المحددة.`,
+      `الإجمالي | ${total} د.إ | النشاط${canAddDinner ? " مع إنفاق تقديري لدى نشاط تجاري محلي" : " فقط"}.`,
+      `المتبقي | ${Math.max(0, budget - total)} د.إ | متاح ضمن الميزانية المحددة.`,
+    ].filter(Boolean).join("\n");
+  }
 
   if (!choice) {
     return `${arrival} | ARRIVAL | No available marketplace activity fits both this arrival time and the AED ${budget} budget.\nTOTAL | AED 0 | No booking selected.\nREMAINING | AED ${budget} | Adjust the arrival time, budget, or requested activity.`;
