@@ -918,7 +918,7 @@ The main real-world obstacles are provider verification, payment handling, and e
 
 ### Survey Validation
 
-A community survey conducted in Al Qua'a (6 respondents) validated both the identified problem and the proposed solution. Participants included local guides (33%), residents (33%), farmers (17%), and restaurant or café owners (17%). 83% were willing to offer paid tourism experiences, while 67% were comfortable hosting 6–15 visitors per day, supporting a community-based tourism model. 67% primarily access the internet through smartphones, reinforcing the need for a mobile-first platform. WhatsApp was identified as the preferred communication channel, validating its integration for bookings and provider communication.
+A community survey conducted in Al Qua'a  validated both the identified problem and the proposed solution. Participants included local guides (33%), residents (33%), farmers (17%), and restaurant or café owners (17%). 83% were willing to offer paid tourism experiences, while 67% were comfortable hosting 6–15 visitors per day, supporting a community-based tourism model. 67% primarily access the internet through smartphones, reinforcing the need for a mobile-first platform. WhatsApp was identified as the preferred communication channel, validating its integration for bookings and provider communication.
 
 
 
