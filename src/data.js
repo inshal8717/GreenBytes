@@ -23,8 +23,7 @@ export const listings = [
     duration: "2–3 hours",
     bestTime: "October–April, from 19:00",
     includes: ["Telescope viewing", "Dates and gahwa", "Local host", "Marked safe zone"],
-    photo:
-      "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=80",
+    photo: "assets/images/desert-stars-10.webp",
     map: { x: 40, y: 43 },
     location: { lat: 23.6082, lng: 54.742 },
     safeZone: [
@@ -54,8 +53,7 @@ export const listings = [
     duration: "1.5–2 hours",
     bestTime: "16:30–18:30",
     includes: ["Camel introduction", "Guided walk", "Water", "Visitor tent"],
-    photo:
-      "https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?auto=format&fit=crop&w=900&q=80",
+    photo: "assets/images/desert-stars-11.webp",
     map: { x: 66, y: 58 },
     location: { lat: 23.596, lng: 54.7585 },
     safeZone: [
@@ -85,8 +83,7 @@ export const listings = [
     duration: "2.5 hours",
     bestTime: "18:30–22:00",
     includes: ["Local dinner", "Camp seating", "Sky stories", "Safe walking route"],
-    photo:
-      "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=900&q=80",
+    photo: "assets/images/desert-stars-07.jpeg",
     map: { x: 70, y: 30 },
     location: { lat: 23.616, lng: 54.764 },
     safeZone: [
@@ -116,8 +113,7 @@ export const listings = [
     duration: "2 hours",
     bestTime: "Early morning or 16:00–sunset",
     includes: ["4x4 and driver", "Sandboard", "Helmet", "Drinking water"],
-    photo:
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80",
+    photo: "assets/images/desert-stars-04.jpeg",
     map: { x: 24, y: 68 },
     location: { lat: 23.59, lng: 54.7315 },
     safeZone: [
@@ -147,8 +143,7 @@ export const listings = [
     duration: "1.5 hours",
     bestTime: "07:00–09:00",
     includes: ["Local guide", "Binoculars", "Water refill", "First-aid kit"],
-    photo:
-      "https://images.unsplash.com/photo-1547234935-80c7145ec969?auto=format&fit=crop&w=900&q=80",
+    photo: "assets/images/desert-stars-08.jpeg",
     map: { x: 34, y: 22 },
     location: { lat: 23.621, lng: 54.735 },
     safeZone: [
@@ -177,7 +172,7 @@ export const listings = [
     duration: "90 minutes",
     bestTime: "Early morning or before sunset",
     includes: ["Falconry guide", "Glove demonstration", "Photography time", "Marked viewing zone"],
-    photo: "https://images.unsplash.com/photo-1611689342806-0863700ce1e4?auto=format&fit=crop&w=900&q=80",
+    photo: "assets/images/desert-stars-03.jpeg",
     map: { x: 58, y: 18 },
     location: { lat: 23.627, lng: 54.753 },
     safeZone: [
@@ -207,7 +202,7 @@ export const listings = [
     duration: "2 hours",
     bestTime: "Late morning or early evening",
     includes: ["Craft materials", "Local instructor", "Date tasting", "Take-home item"],
-    photo: "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&w=900&q=80",
+    photo: "assets/images/desert-stars-02.jpeg",
     map: { x: 55, y: 75 },
     location: { lat: 23.583, lng: 54.751 },
     safeZone: [
@@ -237,7 +232,7 @@ export const listings = [
     duration: "2 hours",
     bestTime: "Sunrise or late afternoon",
     includes: ["Fat bike", "Helmet", "Route guide", "Water and support vehicle"],
-    photo: "https://images.unsplash.com/photo-1502744688674-c619d1586c9e?auto=format&fit=crop&w=900&q=80",
+    photo: "assets/images/desert-stars-13.webp",
     map: { x: 16, y: 38 },
     location: { lat: 23.61, lng: 54.723 },
     safeZone: [
@@ -268,7 +263,7 @@ export const listings = [
     duration: "2.5 hours",
     bestTime: "Morning",
     includes: ["Farm tour", "Cooking instructor", "Breakfast", "Recipe card"],
-    photo: "https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=900&q=80",
+    photo: "assets/images/desert-stars-09.webp",
     map: { x: 80, y: 64 },
     location: { lat: 23.593, lng: 54.771 },
     safeZone: [
@@ -298,7 +293,7 @@ export const listings = [
     duration: "90 minutes",
     bestTime: "Sunrise with calm wind",
     includes: ["Licensed crew", "Safety briefing", "Tethered ascent", "Light refreshments"],
-    photo: "https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?auto=format&fit=crop&w=900&q=80",
+    photo: "assets/images/desert-stars-06.jpeg",
     map: { x: 84, y: 14 },
     location: { lat: 23.632, lng: 54.768 },
     safeZone: [
@@ -389,7 +384,7 @@ export const astronomicalEvents = [
     title: "Perseid Meteor Shower",
     date: "12–13 August 2026",
     time: "23:00–05:00 GST",
-    image: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=700&q=80",
+    image: "assets/images/desert-stars-13.webp",
     info: "A moonless peak makes this a strong Al Qua’a viewing night. Face northeast, allow 30 minutes for your eyes to adapt, and scan the whole sky without a telescope.",
     sourceLabel: "NASA Perseids guide",
     sourceUrl: "https://science.nasa.gov/science-research/planetary-science/26jul_perseids/",
@@ -400,7 +395,7 @@ export const astronomicalEvents = [
     title: "Orionid Meteor Shower",
     date: "22–23 October 2026",
     time: "00:00–05:00 GST",
-    image: "https://images.unsplash.com/photo-1464802686167-b939a6910659?auto=format&fit=crop&w=700&q=80",
+    image: "assets/images/desert-stars-01.jpeg",
     info: "Fast meteors from debris associated with Halley’s Comet. The darker hours after midnight offer the best chance from Al Qua’a’s open desert sky.",
     sourceLabel: "American Meteor Society",
     sourceUrl: "https://www.amsmeteors.org/meteor-showers/2020-meteor-shower-list/7759/",
@@ -411,7 +406,7 @@ export const astronomicalEvents = [
     title: "Leonid Meteor Shower",
     date: "17–18 November 2026",
     time: "01:00–05:30 GST",
-    image: "https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?auto=format&fit=crop&w=700&q=80",
+    image: "assets/images/desert-stars-03.jpeg",
     info: "Look east after midnight as Leo rises. Rates vary from year to year, but the shower can produce especially fast, bright streaks before dawn.",
     sourceLabel: "NASA Leonids guide",
     sourceUrl: "https://science.nasa.gov/solar-system/meteors-meteorites/leonids/",
@@ -422,7 +417,7 @@ export const astronomicalEvents = [
     title: "Geminid Meteor Shower",
     date: "13–14 December 2026",
     time: "21:00–05:30 GST",
-    image: "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&w=700&q=80",
+    image: "assets/images/desert-stars-08.jpeg",
     info: "One of the year’s most reliable showers, with bright meteors visible from evening through dawn. Find a safe dark spot and look away from direct lights.",
     sourceLabel: "NASA Geminids guide",
     sourceUrl: "https://science.nasa.gov/solar-system/meteors-meteorites/geminids/",
@@ -433,7 +428,7 @@ export const astronomicalEvents = [
     title: "Mercury in the Morning Sky",
     date: "2 August 2026",
     time: "04:45–05:30 GST",
-    image: "https://images.unsplash.com/photo-1614728263952-84ea256f9679?auto=format&fit=crop&w=700&q=80",
+    image: "assets/images/desert-stars-05.jpeg",
     info: "Mercury reaches a favorable separation west of the Sun. From Al Qua’a, look very low toward the eastern horizon shortly before sunrise; binoculars help, but stop before the Sun rises.",
     sourceLabel: "2026 astronomy calendar",
     sourceUrl: "https://www.npae.net/wp-content/uploads/2026/01/nPAE_Calendar_2026.pdf",
@@ -444,7 +439,7 @@ export const astronomicalEvents = [
     title: "Venus at Greatest Elongation",
     date: "15 August 2026",
     time: "19:00–21:00 GST",
-    image: "https://images.unsplash.com/photo-1614314107768-6018061b5b72?auto=format&fit=crop&w=700&q=80",
+    image: "assets/images/desert-stars-02.jpeg",
     info: "Brilliant Venus sits farthest from the Sun in the evening sky. Look west after sunset; it should be the brightest star-like object in the twilight.",
     sourceLabel: "EarthSky Venus guide",
     sourceUrl: "https://earthsky.org/astronomy-essentials/venus-after-sunset-greatest-elongation/",
@@ -455,7 +450,7 @@ export const astronomicalEvents = [
     title: "Venus at Greatest Brilliance",
     date: "18 September 2026",
     time: "18:30–20:00 GST",
-    image: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=700&q=80",
+    image: "assets/images/desert-stars-06.jpeg",
     info: "Venus reaches its brightest evening appearance. Watch the western twilight soon after sunset; no telescope is needed to identify this exceptionally bright planet.",
     sourceLabel: "EarthSky Venus guide",
     sourceUrl: "https://earthsky.org/astronomy-essentials/venus-after-sunset-greatest-elongation/",
@@ -466,7 +461,7 @@ export const astronomicalEvents = [
     title: "Saturn at Opposition",
     date: "4 October 2026",
     time: "19:30–05:00 GST",
-    image: "https://images.unsplash.com/photo-1614732484003-ef9881555dc3?auto=format&fit=crop&w=700&q=80",
+    image: "assets/images/desert-stars-07.jpeg",
     info: "Saturn is opposite the Sun and visible for most of the night. It looks like a steady golden point; a telescope is needed to resolve its rings.",
     sourceLabel: "Saturn opposition details",
     sourceUrl: "https://in-the-sky.org/news.php?id=20261004_12_100",
@@ -477,7 +472,7 @@ export const astronomicalEvents = [
     title: "Mercury in the Evening Sky",
     date: "12 October 2026",
     time: "18:10–18:50 GST",
-    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=700&q=80",
+    image: "assets/images/desert-stars-12.webp",
     info: "Mercury reaches its greatest eastern separation from the Sun. Try the low western horizon immediately after sunset; the viewing window is short and requires a clear horizon.",
     sourceLabel: "2026 elongation calendar",
     sourceUrl: "https://starwalk.space/en/news/what-is-elongation",
@@ -488,19 +483,16 @@ export const safetySlides = [
   {
     title: "Leave no trace",
     body: "Keep plastic, food wrappers, and camping waste with you. Desert animals can mistake litter for food.",
-    image:
-      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80",
+    image: "assets/images/desert-stars-11.webp",
   },
   {
     title: "Stay inside marked zones",
     body: "Every host marks a safe visitor boundary. Stay within it unless your guide takes you further.",
-    image:
-      "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=900&q=80",
+    image: "assets/images/desert-stars-04.jpeg",
   },
   {
     title: "Respect night conditions",
     body: "Bring water, keep lights low for stargazing, and share your location only during active bookings.",
-    image:
-      "https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?auto=format&fit=crop&w=900&q=80",
+    image: "assets/images/desert-stars-06.jpeg",
   },
 ];

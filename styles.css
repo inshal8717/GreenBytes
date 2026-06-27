@@ -256,17 +256,57 @@ h3 {
 
 .hero {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   align-items: center;
   padding: 32px;
+  position: relative;
+  isolation: isolate;
+  background: #050812 url("assets/images/desert-stars-01.jpeg") center/cover no-repeat;
+}
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+}
+
+.hero-slideshow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #050812 url("assets/images/desert-stars-01.jpeg") center/cover no-repeat;
+}
+
+.hero-slide {
+  background: var(--hero-image) center/cover no-repeat;
+  opacity: 0;
+  transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity;
+}
+
+.hero-slide.is-active {
+  opacity: 1;
+}
+
+.hero-shade {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(5, 8, 18, 0.9), rgba(7, 12, 26, 0.55)),
-    url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80")
-      center/cover;
+    linear-gradient(90deg, rgba(3, 7, 16, 0.92) 0%, rgba(5, 9, 20, 0.72) 48%, rgba(5, 9, 20, 0.34) 100%),
+    linear-gradient(0deg, rgba(2, 5, 12, 0.38), transparent 45%);
 }
 
 .hero-inner {
   max-width: 980px;
+  position: relative;
+  z-index: 2;
+}
+
+.welcome-language-toggle {
+  z-index: 3;
 }
 
 .hero p {
@@ -485,7 +525,7 @@ textarea {
   min-height: 460px;
   background:
     linear-gradient(rgba(9, 15, 30, 0.58), rgba(8, 13, 26, 0.72)),
-    url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1500&q=80")
+    url("assets/images/desert-stars-12.webp")
       center/cover;
   border: 1px solid var(--line);
   border-radius: 8px;

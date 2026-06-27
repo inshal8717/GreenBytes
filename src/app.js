@@ -24,6 +24,8 @@ import { applyArabicUi, translateArabicText } from "./i18n.js";
 let listings = [...seedListings];
 let unsubscribeListings = null;
 let unsubscribeBookings = null;
+let welcomeSlideshowTimer = null;
+const seedPhotoById = new Map(seedListings.map((listing) => [listing.id, listing.photo]));
 
 const state = {
   user: { ...demoUser },
@@ -62,6 +64,10 @@ const localAuthStorageKey = "alquaa.localUsers";
 const localBookingsStorageKey = "alquaa.localBookings";
 const localListingsStorageKey = "alquaa.localListings";
 const authTimeoutMs = 8000;
+const welcomeImages = Array.from(
+  { length: 13 },
+  (_, index) => `assets/images/desert-stars-${String(index + 1).padStart(2, "0")}.${index < 8 ? "jpeg" : "webp"}`,
+);
 const spaceNotes = [
   "The desert is a natural observatory: dry air and low light make faint stars easier to see.",
   "Fact: The Milky Way is usually best viewed when the Moon is below the horizon.",
@@ -262,6 +268,7 @@ function pageTitle() {
 }
 
 function render() {
+  stopWelcomeSlideshow();
   document.documentElement.lang = state.language;
   document.documentElement.dir = state.language === "ar" ? "rtl" : "ltr";
   document.body.classList.toggle("rtl", state.language === "ar");
@@ -269,6 +276,7 @@ function render() {
     app.innerHTML = welcomeView();
     if (state.language === "ar") applyArabicUi(app);
     wireWelcome();
+    startWelcomeSlideshow();
     return;
   }
 
@@ -316,6 +324,15 @@ function welcomeView() {
   const isRegister = state.authMode === "register";
   return `
     <section class="hero">
+      <div class="hero-slideshow" aria-hidden="true">
+        ${welcomeImages
+          .map(
+            (image, index) =>
+              `<div class="hero-slide ${index === 0 ? "is-active" : ""}" style="--hero-image: url('${image}')"></div>`,
+          )
+          .join("")}
+      </div>
+      <div class="hero-shade" aria-hidden="true"></div>
       <div class="welcome-language-toggle">${languageToggleView()}</div>
       <div class="hero-inner">
         <div class="eyebrow">Al Qua'a Tourism</div>
@@ -365,6 +382,30 @@ function welcomeView() {
       </div>
     </section>
   `;
+}
+
+function startWelcomeSlideshow() {
+  const slides = [...document.querySelectorAll(".hero-slide")];
+  if (slides.length < 2) return;
+
+  let activeIndex = 0;
+  welcomeImages.forEach((source) => {
+    const image = new Image();
+    image.src = source;
+  });
+
+  welcomeSlideshowTimer = window.setInterval(() => {
+    const nextIndex = (activeIndex + 1) % slides.length;
+    slides[activeIndex].classList.remove("is-active");
+    slides[nextIndex].classList.add("is-active");
+    activeIndex = nextIndex;
+  }, 4000);
+}
+
+function stopWelcomeSlideshow() {
+  if (welcomeSlideshowTimer === null) return;
+  window.clearInterval(welcomeSlideshowTimer);
+  welcomeSlideshowTimer = null;
 }
 
 function sidebarView() {
@@ -1811,7 +1852,9 @@ function mergeListings(...groups) {
     if (!listing?.id) return;
     merged.set(listing.id, { ...merged.get(listing.id), ...listing });
   });
-  return [...merged.values()];
+  return [...merged.values()].map((listing) =>
+    seedPhotoById.has(listing.id) ? { ...listing, photo: seedPhotoById.get(listing.id) } : listing,
+  );
 }
 
 function bookingsForCurrentUser() {
