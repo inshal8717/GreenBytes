@@ -751,7 +751,14 @@ GreenBytes/
 
 ---
 
-## 9. Running the Application
+## 9. Architecture Diagram
+
+<img width="1600" height="1307" alt="image" src="https://github.com/user-attachments/assets/a253034d-3b98-4227-8057-4833efe135f7" />
+
+
+
+
+## 10. Running the Application
 
 ### Requirements
 
@@ -775,7 +782,7 @@ The application should be run with the included Node server because the server p
 
 ---
 
-## 10. Gemini Configuration
+## 11. Gemini Configuration
 
 Create a `.env` file in the repository root:
 
@@ -789,7 +796,7 @@ Without this key, the application automatically uses its local rule-based itiner
 
 ---
 
-## 11. Firebase Requirements
+## 12. Firebase Requirements
 
 The application uses:
 
@@ -812,7 +819,7 @@ Before deployment:
 
 ---
 
-## 12. How to Verify the Prototype
+## 13. How to Verify the Prototype
 
 ### Tourist test
 
@@ -849,7 +856,7 @@ Before deployment:
 
 ---
 
-## 13. Current Limitations
+## 14. Current Limitations
 
 Duroob is a hackathon prototype.
 
@@ -867,7 +874,7 @@ Duroob is a hackathon prototype.
 
 ---
 
-## 14. Scalability
+## 15. Scalability
 
 Duroob can be expanded by adding:
 
@@ -888,7 +895,7 @@ Duroob can be expanded by adding:
 The separation between application logic, maps, Firebase services, geographic calculations, and data makes these additions possible without rebuilding the entire platform.
 
 ---
-## 15. Feasibility and Deployment
+## 16. Feasibility and Deployment
 
 Duroob can be operated as a small community tourism platform by a local tourism authority, municipality partner, or startup team.
 
@@ -900,7 +907,7 @@ The main real-world obstacles are provider verification, Arabic language support
 
 ---
 
-## 16. Evidence and Validation
+## 17. Evidence and Validation
 
 ### Research-backed validation
 
@@ -948,7 +955,7 @@ These fallback mechanisms allow the prototype to remain usable even when externa
 
 ---
 
-## 17. Team
+## 18. Team
 
 | Team Member         | Contribution                                  |
 | ------------------- | --------------------------------------------- |
@@ -960,6 +967,6 @@ These fallback mechanisms allow the prototype to remain usable even when externa
 
 ---
 
-## 18. Acknowledgements
+## 19. Acknowledgements
 
 Built for the **Tatweer Hackathon 2026** in collaboration with Abu Dhabi University and inspired by the tourism opportunities and needs of the Al Qua’a community.
