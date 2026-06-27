@@ -4,7 +4,7 @@
 
 **Tatweer Hackathon 2026 — Challenge 5: Solve a Real Problem in Your Community**
 
-* **Live application:** [Add deployment link]
+* **Live application:** https://duroobtourism-zk0e73yfd-green-bytes1.vercel.app/
 * **Demo video:** [Add demo video link]
 
 ---
