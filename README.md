@@ -648,23 +648,30 @@ These fallbacks allow judges to test the main prototype flow even when an extern
 
 ### Tourist Marketplace
 
-(image)
+
+<img width="1300" height="700" alt="image" src="https://github.com/user-attachments/assets/18395a9f-5379-447c-b692-40f2f1c50726" />
+
 
 ### Google Maps
+<img width="1300" height="700" alt="image" src="https://github.com/user-attachments/assets/55594945-0c2e-4e53-acac-0336b345932e" />
 
-(image)
 
 ### Booking System
 
-(image)
+<img width="1295" height="641" alt="image" src="https://github.com/user-attachments/assets/b121d428-32bd-4db8-9031-e7564dadf17e" />
+<img width="1356" height="632" alt="image" src="https://github.com/user-attachments/assets/b8f05b69-dbea-45f4-b60f-984a997e9a55" />
+
 
 ### Provider Dashboard
 
-(image)
+<img width="1366" height="592" alt="image" src="https://github.com/user-attachments/assets/632a2899-f808-4fe5-a72d-fcd25a421a1a" />
+
+
 
 ### AI Planner
+<img width="1347" height="646" alt="image" src="https://github.com/user-attachments/assets/046c2485-45ce-4f09-b91d-9386a02b3aca" />
+<img width="1356" height="415" alt="image" src="https://github.com/user-attachments/assets/c48dbf19-d018-4ba4-b701-2718858dc501" />
 
-(image)
 
 ## 6. User Flow
 
@@ -754,7 +761,6 @@ GreenBytes/
 ## 9. Architecture Diagram
 
 <img width="1600" height="1307" alt="image" src="https://github.com/user-attachments/assets/a253034d-3b98-4227-8057-4833efe135f7" />
-
 
 
 
