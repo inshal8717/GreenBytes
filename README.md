@@ -644,6 +644,27 @@ When Gemini is unavailable, the included local itinerary planner is used.
 These fallbacks allow judges to test the main prototype flow even when an external service fails.
 
 ---
+## Screenshots
+
+### Tourist Marketplace
+
+(image)
+
+### Google Maps
+
+(image)
+
+### Booking System
+
+(image)
+
+### Provider Dashboard
+
+(image)
+
+### AI Planner
+
+(image)
 
 ## 6. User Flow
 
