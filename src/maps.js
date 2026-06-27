@@ -5,38 +5,38 @@ let activeMap;
 let activeInfoWindow;
 
 const darkMapStyle = [
-  { elementType: "geometry", stylers: [{ color: "#1b211f" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#d9e1dc" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#111514" }] },
+  { elementType: "geometry", stylers: [{ color: "#101827" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#dce9ff" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#070b16" }] },
   {
     featureType: "administrative",
     elementType: "geometry.stroke",
-    stylers: [{ color: "#52615c" }],
+    stylers: [{ color: "#4e6388" }],
   },
   {
     featureType: "landscape.natural",
     elementType: "geometry",
-    stylers: [{ color: "#18211f" }],
+    stylers: [{ color: "#101b31" }],
   },
   {
     featureType: "poi",
     elementType: "geometry",
-    stylers: [{ color: "#22302c" }],
+    stylers: [{ color: "#182744" }],
   },
   {
     featureType: "road",
     elementType: "geometry",
-    stylers: [{ color: "#2b3632" }],
+    stylers: [{ color: "#263a60" }],
   },
   {
     featureType: "road",
     elementType: "geometry.stroke",
-    stylers: [{ color: "#111514" }],
+    stylers: [{ color: "#080d19" }],
   },
   {
     featureType: "water",
     elementType: "geometry",
-    stylers: [{ color: "#0e1718" }],
+    stylers: [{ color: "#071225" }],
   },
 ];
 
@@ -60,7 +60,7 @@ function loadGoogleMaps() {
 
 export async function mountGoogleMap(container, options) {
   const maps = await loadGoogleMaps();
-  const { center, listings, localSpots, onListingSelect, skyOverlay } = options;
+  const { center, listings, localSpots, onListingSelect, highlightedListingId } = options;
 
   activeMap = new maps.Map(container, {
     center,
@@ -75,16 +75,40 @@ export async function mountGoogleMap(container, options) {
 
   activeInfoWindow = new maps.InfoWindow();
 
+  const areaMarker = new maps.Marker({
+    position: center,
+    map: activeMap,
+    label: "AQ",
+    title: "Al Qua'a area",
+    zIndex: 3,
+  });
+  areaMarker.addListener("click", () => {
+    activeInfoWindow.setContent("<strong>Al Qua'a visitor hub</strong><br>Map centre: 23.603656, 54.748052");
+    activeInfoWindow.open({ map: activeMap, anchor: areaMarker });
+  });
+
   listings.forEach((listing, index) => {
-    new maps.Polygon({
+    const isHighlighted = listing.id === highlightedListingId;
+    const safeZone = new maps.Polygon({
       paths: listing.safeZone,
-      strokeColor: "#80b9aa",
-      strokeOpacity: 0.9,
-      strokeWeight: 2,
-      fillColor: "#80b9aa",
-      fillOpacity: 0.18,
+      strokeColor: isHighlighted ? "#ff4d4d" : "#78a8ff",
+      strokeOpacity: 0.95,
+      strokeWeight: isHighlighted ? 4 : 2,
+      fillColor: isHighlighted ? "#ff4d4d" : "#78a8ff",
+      fillOpacity: isHighlighted ? 0.3 : 0.18,
       map: activeMap,
+      zIndex: isHighlighted ? 2 : 1,
     });
+    safeZone.addListener("click", () => onListingSelect(listing.id, true));
+
+    if (isHighlighted) {
+      const bounds = new maps.LatLngBounds();
+      listing.safeZone.forEach((point) => bounds.extend(point));
+      activeMap.fitBounds(bounds, 70);
+      maps.event.addListenerOnce(activeMap, "idle", () => {
+        if (activeMap.getZoom() > 15) activeMap.setZoom(15);
+      });
+    }
 
     const marker = new maps.Marker({
       position: listing.location,
@@ -94,9 +118,13 @@ export async function mountGoogleMap(container, options) {
     });
 
     marker.addListener("click", () => {
-      onListingSelect(listing.id);
-      activeInfoWindow.setContent(`<strong>${listing.title}</strong><br>${listing.ownerName}`);
+      activeInfoWindow.setContent(
+        `<strong>${listing.title}</strong><br>${listing.businessName || listing.ownerName}<br>` +
+          `${listing.duration || "Flexible duration"} · Best: ${listing.bestTime || "Ask host"}<br>` +
+          `<span style="color:#78a8ff">Blue polygon: visitor safe zone</span>`,
+      );
       activeInfoWindow.open({ map: activeMap, anchor: marker });
+      onListingSelect(listing.id);
     });
   });
 
@@ -104,30 +132,91 @@ export async function mountGoogleMap(container, options) {
     const marker = new maps.Marker({
       position: spot.location,
       map: activeMap,
-      label: spot.type[0],
+      label: spot.type === "Restaurant" ? "R" : spot.type === "Cafe" ? "C" : "B",
       title: spot.name,
     });
     marker.addListener("click", () => {
-      activeInfoWindow.setContent(`<strong>${spot.name}</strong><br>${spot.type} | AED ${spot.price}`);
+      const directions = `https://www.google.com/maps/dir/?api=1&destination=${spot.location.lat},${spot.location.lng}`;
+      activeInfoWindow.setContent(
+        `<strong>${spot.name}</strong><br>${spot.type} · ${spot.priceLabel}<br>${spot.description}<br>` +
+          `<small>${spot.hours} · Demo pricing</small><br><a href="${directions}" target="_blank">Directions</a>`,
+      );
       activeInfoWindow.open({ map: activeMap, anchor: marker });
     });
   });
 
-  if (skyOverlay) {
-    const skyBounds = {
-      north: center.lat + 0.09,
-      south: center.lat - 0.09,
-      east: center.lng + 0.12,
-      west: center.lng - 0.12,
-    };
-    new maps.Rectangle({
-      bounds: skyBounds,
-      map: activeMap,
-      strokeColor: "#d7b46a",
-      strokeOpacity: 0.35,
-      strokeWeight: 1,
-      fillColor: "#d7b46a",
-      fillOpacity: 0.08,
+}
+
+export async function mountLocationPicker(container, options) {
+  const maps = await loadGoogleMaps();
+  const { center, initialLocation, onPick } = options;
+  const map = new maps.Map(container, {
+    center: initialLocation || center,
+    zoom: 13,
+    disableDefaultUI: true,
+    zoomControl: true,
+    styles: darkMapStyle,
+  });
+  const marker = new maps.Marker({
+    position: initialLocation || center,
+    map,
+    draggable: true,
+    title: "Listing location",
+  });
+
+  const update = (position) => {
+    const location = { lat: position.lat(), lng: position.lng() };
+    marker.setPosition(location);
+    onPick(location);
+  };
+
+  map.addListener("click", (event) => update(event.latLng));
+  marker.addListener("dragend", (event) => update(event.latLng));
+  onPick(marker.getPosition().toJSON());
+}
+
+export async function mountSafeZonePicker(container, options) {
+  const maps = await loadGoogleMaps();
+  const { center, initialPoints = [], onChange } = options;
+  const map = new maps.Map(container, {
+    center,
+    zoom: 14,
+    disableDefaultUI: true,
+    zoomControl: true,
+    styles: darkMapStyle,
+  });
+  const points = initialPoints.map((point) => ({ ...point }));
+  const markers = [];
+  const polygon = new maps.Polygon({
+    paths: points,
+    map,
+    strokeColor: "#78a8ff",
+    strokeOpacity: 0.95,
+    strokeWeight: 3,
+    fillColor: "#78a8ff",
+    fillOpacity: 0.22,
+  });
+
+  const redrawMarkers = () => {
+    markers.splice(0).forEach((marker) => marker.setMap(null));
+    points.forEach((point, index) => {
+      markers.push(
+        new maps.Marker({
+          position: point,
+          map,
+          label: String(index + 1),
+          title: `Boundary point ${index + 1}`,
+        }),
+      );
     });
-  }
+  };
+
+  map.addListener("click", (event) => {
+    points.push(event.latLng.toJSON());
+    polygon.setPath(points);
+    redrawMarkers();
+    onChange([...points]);
+  });
+  redrawMarkers();
+  onChange([...points]);
 }

@@ -59,8 +59,8 @@ async function handleItinerary(req, res) {
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          temperature: 0.45,
-          maxOutputTokens: 500,
+          temperature: 0.3,
+          maxOutputTokens: 900,
         },
       }),
     },
@@ -80,20 +80,54 @@ async function handleItinerary(req, res) {
 }
 
 function buildPrompt(body) {
+  const activityCatalog = (body.listings || []).flatMap((listing) =>
+    (listing.activities || []).map((activity) => ({
+      listingId: listing.id,
+      experience: listing.title,
+      host: listing.businessName || listing.ownerName,
+      safeZoneMapped: Array.isArray(listing.safeZone) && listing.safeZone.length >= 3,
+      activityId: activity.id,
+      activity: activity.name,
+      priceAED: Number(activity.price),
+      duration: activity.duration || listing.duration,
+      bestTime: activity.bestTime || listing.bestTime,
+      availableStartTimes: activity.slots || [],
+      includes: listing.includes || [],
+    })),
+  );
+  const businessCatalog = (body.localSpots || []).map((spot) => ({
+    name: spot.name,
+    type: spot.type,
+    estimatedPriceAED: Number(spot.price),
+    priceRange: spot.priceLabel,
+    hours: spot.hours,
+    description: spot.description,
+  }));
+
   return [
-    "Create a concise evening itinerary for a tourist visiting Al Qua'a.",
-    "Keep the schedule practical, safe, and focused on spending with local farms, restaurants, and shops.",
+    "You are the itinerary planner inside an Al Qua'a local tourism marketplace.",
+    "Create a detailed, practical schedule tailored to the visitor's interests.",
+    "STRICT GROUNDING: use only activities and businesses in the supplied catalogs. Never invent a stop, activity, host, price, time slot, or inclusion.",
+    "Schedule activities only at an availableStartTime and never before arrival.",
+    "Stay within budget and prioritize close matches to the visitor request.",
+    "For each activity state the exact experience, activity, host, duration, start time, AED cost, inclusions, and mapped-safe-zone reminder.",
+    "Label local-business costs as estimates.",
     `Arrival time: ${body.arrival || "17:00"}.`,
     `Budget in AED: ${body.budget || 250}.`,
-    `Listings: ${JSON.stringify(body.listings || [])}.`,
-    `Local restaurants and shops: ${JSON.stringify(body.localSpots || [])}.`,
-    "Return 3 to 5 time-stamped stops. Mention booking costs where useful.",
+    `Visitor interests and constraints: ${String(body.preferences || "No preference supplied").slice(0, 500)}.`,
+    `AVAILABLE ACTIVITIES: ${JSON.stringify(activityCatalog)}.`,
+    `AVAILABLE LOCAL BUSINESSES: ${JSON.stringify(businessCatalog)}.`,
+    "Return plain text without Markdown. Use one line per item:",
+    "TIME–TIME | STOP OR ACTIVITY | Host/business; details; duration; AED cost; why it matches.",
+    "Finish with TOTAL | AED amount | cost breakdown, then REMAINING | AED amount | budget remaining.",
+    "Return 3 to 6 useful lines. If a request is unavailable, name the closest catalog alternative.",
   ].join("\n");
 }
 
 function buildFallbackPlan(body) {
   const budget = Number(body.budget || 250);
   const arrival = body.arrival || "17:00";
+  const preferences = String(body.preferences || "").toLowerCase();
   const listings = body.listings || [];
   const localSpots = body.localSpots || [];
   const activities = listings
@@ -103,21 +137,53 @@ function buildFallbackPlan(body) {
         activity,
       })),
     )
-    .filter((item) => Number(item.activity.price) <= budget)
-    .sort((a, b) => Number(b.activity.price) - Number(a.activity.price));
-  const choice = activities[0];
+    .map((item) => ({
+      ...item,
+      availableSlots: (item.activity.slots || []).filter((slot) => timeToMinutes(slot) >= timeToMinutes(arrival)),
+      matchScore: preferenceScore(preferences, item),
+    }))
+    .filter((item) => Number(item.activity.price) <= budget && item.availableSlots.length)
+    .sort((a, b) => b.matchScore - a.matchScore || Number(b.activity.price) - Number(a.activity.price));
   const dinner = localSpots.find((spot) => spot.type === "Restaurant") || localSpots[0];
+  const dinnerCost = dinner ? Number(dinner.price || 0) : 0;
+  const choice = activities.find((item) => Number(item.activity.price) + dinnerCost <= budget) || activities[0];
 
   if (!choice) {
-    return `${arrival} - Arrive in Al Qua'a and visit a local shop.\n18:30 - Choose a low-cost restaurant stop.\n20:00 - Use the map to pick an available safe-zone activity.`;
+    return `${arrival} | ARRIVAL | No available marketplace activity fits both this arrival time and the AED ${budget} budget.\nTOTAL | AED 0 | No booking selected.\nREMAINING | AED ${budget} | Adjust the arrival time, budget, or requested activity.`;
   }
 
+  const activityCost = Number(choice.activity.price || 0);
+  const canAddDinner = dinner && activityCost + dinnerCost <= budget;
+  const total = activityCost + (canAddDinner ? dinnerCost : 0);
+  const slot = choice.availableSlots[0];
+  const host = choice.listing.businessName || choice.listing.ownerName;
+  const duration = choice.activity.duration || choice.listing.duration || "duration confirmed by host";
+  const includes = (choice.listing.includes || []).join(", ") || "see listing details";
+
   return [
-    `${arrival} - Arrive near Al Qua'a and buy water or snacks locally.`,
-    dinner ? `18:30 - Dinner at ${dinner.name}, approx. AED ${dinner.price}.` : "18:30 - Dinner at a local restaurant.",
-    `${choice.activity.slots?.[0] || "20:00"} - ${choice.activity.name} at ${choice.listing.title}, AED ${choice.activity.price}.`,
-    "After the visit - Check out so live location sharing stops.",
-  ].join("\n");
+    `${arrival} | ARRIVAL | Reach the visitor area, carry water, and review the blue safe-zone boundary.`,
+    canAddDinner ? `${arrival} onward | ${dinner.name} | ${dinner.description}; estimated AED ${dinnerCost}; open ${dinner.hours}.` : null,
+    `${slot} | ${choice.activity.name} | ${choice.listing.title}, hosted by ${host}; ${duration}; AED ${activityCost}; includes ${includes}; remain inside the mapped safe zone.`,
+    `TOTAL | AED ${total} | Activity${canAddDinner ? " plus estimated local-business spending" : " only"}.`,
+    `REMAINING | AED ${Math.max(0, budget - total)} | Available within the stated budget.`,
+  ].filter(Boolean).join("\n");
+}
+
+function timeToMinutes(value) {
+  const [hours, minutes] = String(value || "00:00").split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+function preferenceScore(preferences, item) {
+  if (!preferences) return 0;
+  const searchable = [
+    item.activity.name,
+    item.listing.title,
+    item.listing.description,
+    ...(item.listing.includes || []),
+  ].join(" ").toLowerCase();
+  const words = preferences.match(/[a-z0-9]+/g) || [];
+  return words.filter((word) => word.length > 2 && searchable.includes(word)).length;
 }
 
 async function serveStatic(pathname, res) {
