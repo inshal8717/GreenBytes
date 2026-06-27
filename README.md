@@ -916,20 +916,11 @@ The main real-world obstacles are provider verification, payment handling, and e
 
 ## 17. Evidence and Validation
 
-### Research-backed validation
+### Survey Validation
 
-Duroob is based on established principles from rural and community-based tourism rather than introducing an entirely new concept.
+A community survey conducted in Al Qua'a (6 respondents) validated both the identified problem and the proposed solution. Participants included local guides (33%), residents (33%), farmers (17%), and restaurant or café owners (17%). 83% were willing to offer paid tourism experiences, while 67% were comfortable hosting 6–15 visitors per day, supporting a community-based tourism model. 67% primarily access the internet through smartphones, reinforcing the need for a mobile-first platform. WhatsApp was identified as the preferred communication channel, validating its integration for bookings and provider communication.
 
-Research on rural tourism shows that connecting visitors with local communities can diversify local income, create opportunities for small businesses, and encourage sustainable economic development in rural areas. Duroob applies these principles by allowing farmers, guides, restaurants, cafés, and other local businesses in Al Qua'a to publish experiences directly to visitors.
 
-Agritourism has also become an established tourism model in many countries, where visitors participate in farm experiences, educational activities, hospitality, and outdoor recreation. These activities provide an additional income source for farmers while giving tourists authentic local experiences.
-
-Community-based tourism further supports involving local residents directly in tourism activities so that more economic value remains within the community instead of leaving the region.
-
-**References**
-
-- Rural Tourism — https://en.wikipedia.org/wiki/Rural_tourism
-- Agritourism — https://en.wikipedia.org/wiki/Agritourism
 
 ### Prototype validation
 
