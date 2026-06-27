@@ -4,7 +4,7 @@ This repository is a submission for the Tatweer Hackathon taking place in June 2
 **Tatweer Hackathon 2026 — Challenge 5: Solve a Real Problem in Your Community**
 
 * **Live application:** https://duroobtourism.vercel.app/
-* **Demo video:** [Add demo video link]
+* **Demo video:** https://youtu.be/kawjYLrZvtg
 
 ---
 
