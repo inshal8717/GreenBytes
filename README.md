@@ -876,6 +876,7 @@ The prototype is already deployable as a web application. It uses Firebase Authe
 For an early pilot, operating costs can remain low because Firebase and Vercel provide free or low-cost tiers for small usage. As usage grows, costs would mainly come from Firebase reads/writes, image storage, Google Maps API usage, and Gemini API calls.
 
 The main real-world obstacles are provider verification, Arabic language support, payment handling, and ensuring that safe-zone data is approved by landowners. These are listed as future improvements rather than hidden limitations.
+
 ---
 
 ## 16. Evidence and Validation
