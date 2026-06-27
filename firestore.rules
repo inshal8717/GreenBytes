@@ -28,6 +28,10 @@ service cloud.firestore {
       }
     }
 
+    match /{path=**}/bookings/{bookingId} {
+      allow read: if signedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
     match /listings/{listingId} {
       allow read: if true;
       allow create: if signedIn() && request.resource.data.ownerId == request.auth.uid;

@@ -10,7 +10,6 @@ import {
   logoutFirebaseUser,
   registerUserAccount,
   saveUserProfile,
-  seedListingsIfEmpty,
   updateLiveLocation,
   uploadListingImage,
   watchBookingsForFarmer,
@@ -99,7 +98,6 @@ async function registerWithPassword(form) {
       bookings: [],
       screen: isProvider ? "farmerOnboarding" : "safety",
     });
-    seedFirebaseListings();
     startFirebaseListeners(firebaseUser.uid, isProvider ? "farmer" : "tourist");
   } catch (error) {
     if (shouldUseLocalAuthFallback(error)) {
@@ -177,7 +175,6 @@ async function enterFirebaseSession(firebaseUser) {
     bookings: [],
     screen: activeRole === "farmer" ? "dashboard" : user.safetyPledgeAccepted ? "map" : "safety",
   });
-  seedFirebaseListings();
   startFirebaseListeners(firebaseUser.uid, activeRole);
 }
 
@@ -214,12 +211,6 @@ function startFirebaseListeners(uid, activeRole) {
       setState({ firebaseStatus: "Booking sync error" });
     },
   );
-}
-
-function seedFirebaseListings() {
-  seedListingsIfEmpty(seedListings).catch((error) => {
-    console.warn("Could not seed listings.", error);
-  });
 }
 
 function roleLabel() {
@@ -771,7 +762,7 @@ function listingFormView(buttonLabel) {
       <div class="field"><label>Best timing</label><input name="bestTime" value="Late afternoon through sunset" required></div>
       <div class="field"><label>Listing image</label><input name="photo" type="file" accept="image/*" required></div>
       ${locationSection}
-      <button class="primary-btn">${buttonLabel}</button>
+      <button class="primary-btn" type="submit">${buttonLabel}</button>
     </form>
   `;
 }
@@ -1198,22 +1189,28 @@ function wireApp() {
 }
 
 async function saveFarmerListing(form) {
-  const button = form.querySelector("button[type='submit']");
-  const originalText = button.textContent;
+  const button = form.querySelector("button[type='submit'], button:not([type]), input[type='submit']");
+  const originalText = button?.textContent || button?.value || "Save listing";
   if (state.authProvider !== "firebase" || !state.uid) {
     alert("Provider listings require a connected Firebase account. Sign in again and retry.");
     return;
   }
-  button.disabled = true;
-  button.textContent = "Saving to Firebase...";
+  if (button) {
+    button.disabled = true;
+    if ("textContent" in button) button.textContent = "Saving to Firebase...";
+    else button.value = "Saving to Firebase...";
+  }
   const formData = new FormData(form);
   const file = formData.get("photo");
   const providerType = state.user.providerType || "farmer";
   const isFarmer = providerType === "farmer";
   if (isFarmer && state.newListingSafeZone.length < 3) {
     alert("Draw at least three boundary points around the farm before saving.");
-    button.disabled = false;
-    button.textContent = originalText;
+    if (button) {
+      button.disabled = false;
+      if ("textContent" in button) button.textContent = originalText;
+      else button.value = originalText;
+    }
     return;
   }
   const safeZone = isFarmer ? [...state.newListingSafeZone] : defaultSafeZone(state.newListingLocation || alQuaaCenter);
@@ -1282,9 +1279,10 @@ async function saveFarmerListing(form) {
     setState({ firebaseStatus: "Listing save failed" });
     alert(`Listing was not published: ${error?.message || "Firebase save failed."}`);
   } finally {
-    if (button.isConnected) {
+    if (button?.isConnected) {
       button.disabled = false;
-      button.textContent = originalText;
+      if ("textContent" in button) button.textContent = originalText;
+      else button.value = originalText;
     }
   }
 }
