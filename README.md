@@ -1,6 +1,6 @@
 # Duroob - Tourism for Al-Qua'a region
 This repository is a submission for the Tatweer Hackathon, taking place in June 2026.
-Duroob is a community platform for facilitating and promoting tourism in the Al-Qua'a region. It allows users to discover events and activities, for instance, stargazing and camel riding inthe  Al-Qua'a region.
+Duroob is a community platform for facilitating and promoting tourism in the Al-Qua'a region. It allows users to discover events and activities, for instance, stargazing and camel riding in the  Al-Qua'a region.
 # Al Qua’a Tourism Exchange
 
 A tourism marketplace connecting visitors with farmers and local guides in Al Qua’a through safe stargazing, camel-farm, and desert experiences.
