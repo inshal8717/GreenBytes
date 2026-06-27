@@ -663,14 +663,13 @@ These fallbacks allow judges to test the main prototype flow even when an extern
 
 
 ### Provider Dashboard
-
+<img width="1353" height="619" alt="image" src="https://github.com/user-attachments/assets/97fa7848-0fd8-41f4-96f6-eae51432c56d" />
 <img width="1366" height="592" alt="image" src="https://github.com/user-attachments/assets/632a2899-f808-4fe5-a72d-fcd25a421a1a" />
 
 
 
 ### AI Planner
 <img width="1347" height="646" alt="image" src="https://github.com/user-attachments/assets/046c2485-45ce-4f09-b91d-9386a02b3aca" />
-<img width="1356" height="415" alt="image" src="https://github.com/user-attachments/assets/c48dbf19-d018-4ba4-b701-2718858dc501" />
 
 
 ## 6. User Flow
