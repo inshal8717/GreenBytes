@@ -867,8 +867,66 @@ Duroob can be expanded by adding:
 The separation between application logic, maps, Firebase services, geographic calculations, and data makes these additions possible without rebuilding the entire platform.
 
 ---
+## 15. Feasibility and Deployment
 
-## 15. Team
+Duroob can be operated as a small community tourism platform by a local tourism authority, municipality partner, or startup team.
+
+The prototype is already deployable as a web application. It uses Firebase Authentication, Firestore, Realtime Database, Firebase Storage, Google Maps, Gemini, and a Node.js server.
+
+For an early pilot, operating costs can remain low because Firebase and Vercel provide free or low-cost tiers for small usage. As usage grows, costs would mainly come from Firebase reads/writes, image storage, Google Maps API usage, and Gemini API calls.
+
+The main real-world obstacles are provider verification, Arabic language support, payment handling, and ensuring that safe-zone data is approved by landowners. These are listed as future improvements rather than hidden limitations.
+---
+
+## 16. Evidence and Validation
+
+### Research-backed validation
+
+Duroob is based on established principles from rural and community-based tourism rather than introducing an entirely new concept.
+
+Research on rural tourism shows that connecting visitors with local communities can diversify local income, create opportunities for small businesses, and encourage sustainable economic development in rural areas. Duroob applies these principles by allowing farmers, guides, restaurants, cafés, and other local businesses in Al Qua'a to publish experiences directly to visitors.
+
+Agritourism has also become an established tourism model in many countries, where visitors participate in farm experiences, educational activities, hospitality, and outdoor recreation. These activities provide an additional income source for farmers while giving tourists authentic local experiences.
+
+Community-based tourism further supports involving local residents directly in tourism activities so that more economic value remains within the community instead of leaving the region.
+
+**References**
+
+- Rural Tourism — https://en.wikipedia.org/wiki/Rural_tourism
+- Agritourism — https://en.wikipedia.org/wiki/Agritourism
+
+### Prototype validation
+
+During development, the team manually tested all major user flows and application features, including:
+
+- User registration and authentication
+- Tourist safety pledge
+- Marketplace browsing
+- Google Maps integration
+- Safe-zone drawing and visualization
+- Provider listing creation and publication
+- Booking creation and cancellation
+- Booking conflict detection
+- Provider dashboard
+- WhatsApp contact integration
+- AI itinerary generation
+- Rule-based itinerary fallback
+
+Each workflow was tested repeatedly throughout development to verify that the complete tourist and provider journeys functioned as expected.
+
+### Reliability testing
+
+The prototype also includes several fallback mechanisms that were verified during development.
+
+- When the Gemini API is unavailable, the application automatically switches to its built-in rule-based itinerary planner.
+- When Firebase services are unavailable, the prototype can use browser-based local storage for demonstration purposes.
+- When Google Maps cannot be loaded, the application displays a simplified fallback view instead of failing completely.
+
+These fallback mechanisms allow the prototype to remain usable even when external cloud services are unavailable, improving reliability during demonstrations.
+
+---
+
+## 17. Team
 
 | Team Member         | Contribution                                  |
 | ------------------- | --------------------------------------------- |
@@ -880,6 +938,6 @@ The separation between application logic, maps, Firebase services, geographic ca
 
 ---
 
-## 16. Acknowledgements
+## 18. Acknowledgements
 
 Built for the **Tatweer Hackathon 2026** in collaboration with Abu Dhabi University and inspired by the tourism opportunities and needs of the Al Qua’a community.
