@@ -7,7 +7,7 @@ A tourism marketplace connecting visitors with farmers and local guides in Al Qu
 
 **Tatweer Hackathon 2026 — Challenge 5: Solve a Real Problem in Your Community**
 
-* **Live demo:**
+* **Live demo:** https://duroobtourism.vercel.app/
 * **Demo video:** 
 
 ---
