@@ -200,6 +200,9 @@ The application displays different pages depending on the active user role.
 * Account settings.
 
 The provider title changes depending on whether the account belongs to a farmer, guide, or local business.
+### Bilingual Interface
+
+Duroob supports both English and Arabic interfaces. Users can switch between languages, allowing both local residents and international visitors to use the platform more comfortably. The interface, navigation, and major user flows are available in both languages.
 
 ---
 
@@ -885,7 +888,6 @@ Duroob can be expanded by adding:
 
 * More farms, guides, and businesses.
 * More rural tourism regions.
-* Arabic and multilingual support.
 * Provider verification.
 * Online payments.
 * Ratings and reviews.
@@ -908,7 +910,7 @@ The prototype is already deployable as a web application. It uses Firebase Authe
 
 For an early pilot, operating costs can remain low because Firebase and Vercel provide free or low-cost tiers for small usage. As usage grows, costs would mainly come from Firebase reads/writes, image storage, Google Maps API usage, and Gemini API calls.
 
-The main real-world obstacles are provider verification, Arabic language support, payment handling, and ensuring that safe-zone data is approved by landowners. These are listed as future improvements rather than hidden limitations.
+The main real-world obstacles are provider verification, payment handling, and ensuring that safe-zone data is approved by landowners. The prototype already includes bilingual English and Arabic support to improve accessibility for both local residents and international visitors.
 
 ---
 
@@ -945,6 +947,8 @@ During development, the team manually tested all major user flows and applicatio
 - WhatsApp contact integration
 - AI itinerary generation
 - Rule-based itinerary fallback
+- English and Arabic language switching
+
 
 Each workflow was tested repeatedly throughout development to verify that the complete tourist and provider journeys functioned as expected.
 
