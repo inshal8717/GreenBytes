@@ -1,6 +1,5 @@
-# Duroob
-
-> A community tourism marketplace connecting visitors with farmers, guides, and local businesses in Al Qua’a.
+# Duroob - Tourism for the Al-Qua'a region
+This repository is a submission for the Tatweer Hackathon taking place in June 2026. Duroob is a a community tourism marketplace connecting visitors with farmers, guides, and local businesses in Al Qua’a.
 
 **Tatweer Hackathon 2026 — Challenge 5: Solve a Real Problem in Your Community**
 
